@@ -1,0 +1,39 @@
+apply plugin: 'com.android.library'
+android {
+    compileSdkVersion 19
+    buildToolsVersion "26.0.2"
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 19
+        versionCode 1
+        versionName "0.0.1"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
+
+dependencies {
+    compile project(':invsysdev')
+}
+
+task makeJar(type: Copy) {
+    delete '../libs/jar/Invengo/android/com/invengo.system.ctrl.jar'
+    from('build/intermediates/bundles/release/')
+    into('../libs/jar/Invengo/android/com/')
+    include('classes.jar')
+    rename('classes.jar', 'invengo.system.ctrl.jar')
+}
+makeJar.dependsOn(build)
