@@ -1,5 +1,8 @@
 package invengo.javaapi.protocol.IRP1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.GBMemoryBank;
 import invengo.javaapi.core.IMessage;
@@ -9,9 +12,6 @@ import invengo.javaapi.core.ReceivedInfo;
 import invengo.javaapi.core.Util;
 import invengo.javaapi.handle.EventArgs;
 import invengo.javaapi.handle.IEventHandle;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class BaseMessage extends MessageFrame implements IMessage {
 
@@ -76,6 +76,7 @@ public abstract class BaseMessage extends MessageFrame implements IMessage {
 		this.timeout = timeOut;
 	}
 
+	// 拼接二进制码，结果为真正要发送的二进制码
 	public byte[] getTransmitterData() {
 		msgID = super.msgType;
 		int len = 1;

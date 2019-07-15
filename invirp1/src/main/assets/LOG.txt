@@ -1,5 +1,11 @@
 ﻿Invengo Android版RFID类库
 
+V0.0.2 ：
+完成日期 ： 2019-7-15 17:00
+完成人 ： 李泽荣
+	1. 去掉不能用的 BluetoothLE 和 BluetoothLET 类，以及关联的 AndroidBleApi_V1.1.0.jar 包
+	2. 新建 BLE 连接类
+
 V0.0.1 ：
 完成日期 ： 2019-7-2 17:00
 完成人 ： 李泽荣

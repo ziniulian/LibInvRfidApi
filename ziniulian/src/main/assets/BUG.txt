@@ -1,0 +1,2 @@
+1. BlutosLE 类 ： 在 BlutosDev 中尝试保存连接句柄。二次连接时，尝试使用 BluetoothGatt.connect() 方法，测试是否会更加快速。
+2. 实现 Str.jsons 方法

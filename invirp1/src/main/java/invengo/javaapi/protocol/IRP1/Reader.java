@@ -1,11 +1,5 @@
 package invengo.javaapi.protocol.IRP1;
 
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-
 import com.invengo.lib.diagnostics.InvengoLog;
 import com.invengo.lib.system.ModuleControl;
 import com.invengo.lib.system.device.DeviceManager;
@@ -19,7 +13,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import invengo.javaapi.communication.BluetoothLET;
+import invengo.javaapi.communication.Ble;
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessage;
 import invengo.javaapi.core.IMessageNotification;
@@ -40,6 +34,9 @@ public class Reader extends BaseReader implements
 	protected String readerType = "";
 	protected volatile boolean isStopReadTag = false;
 	private static int mWakeupCount = 0;
+
+	// BLE
+	private Ble bleIcomm = null;
 
 	public List<IMessageNotificationReceivedHandle> onMessageNotificationReceived = new ArrayList<IMessageNotificationReceivedHandle>();
 
@@ -64,10 +61,20 @@ public class Reader extends BaseReader implements
 	/**
 	 * BLE
 	 */
+	/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
 	public Reader(String readerName, String portType, String connStr, Activity context, ReaderChannelType channelType) {
 		super(readerName, "IRP1", portType, connStr, context, channelType);
 		super.onMessageNotificationReceived.add(this);
 		registerBluetoothBroadcastReceiver();
+	}
+	*/
+
+	// BLE
+	public Reader(String readerName, String connStr, Ble b) {
+		super(readerName, "IRP1", "RS232", connStr);
+		b.setRd(this);
+		bleIcomm = b;
+		super.onMessageNotificationReceived.add(this);
 	}
 
 	public void messageNotificationReceivedHandle(BaseReader reader,
@@ -151,11 +158,25 @@ public class Reader extends BaseReader implements
 			return true;
 		}
 
+		// BLE 连接
+		if (bleIcomm != null) {
+			try {
+				readerType = "800";	// 补充 doRssiUtcQuery(); 方法的执行
+				iComm = bleIcomm;
+				iComm.open(connStr);
+			} catch (Exception e) {}
+			return false;
+		}
+
 		// Device Power On
 		powerControl(true);
 
 		boolean isConn = super.connect();
+
+		// TODO: 2019/7/10 目前为测试过程，暂时保留。在下一版本中取消所有类似注释
+		/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
 		if(null == super.context){
+		*/
 			if (isConn) {
 				try {
 					Thread.sleep(2000);
@@ -167,7 +188,9 @@ public class Reader extends BaseReader implements
 				disConnect();
 				isConn = false;
 			}
+		/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
 		}
+		*/
 		return isConn;
 	}
 
@@ -219,6 +242,7 @@ public class Reader extends BaseReader implements
 	/*
 	 * Start.BLE连接处理
 	 */
+	/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
 	private BluetoothLEBroadcastReceiver mBluetoothChangeReceiver = null;
 	private IntentFilter mAclConnectFilter = null;
 	private IntentFilter mAclDisconnectFilter = null;
@@ -261,7 +285,7 @@ public class Reader extends BaseReader implements
 		Intent broadcastIntent = new Intent(action);
 		super.context.sendBroadcast(broadcastIntent);
 	}
-	
+	*/
 	/*
 	 * End.BLE连接处理
 	 */
@@ -274,12 +298,14 @@ public class Reader extends BaseReader implements
 			super.disConnect();
 			// Device Power Off
 			powerControl(false);
+			/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
 			if(null != super.context){
 				if(null != mBluetoothChangeReceiver){
 					super.context.unregisterReceiver(mBluetoothChangeReceiver);
 					mBluetoothChangeReceiver = null;
 				}
 			}
+			*/
 		}
 	}
 

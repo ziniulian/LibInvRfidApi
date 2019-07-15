@@ -2,9 +2,6 @@ package invengo.javaapi.protocol.IRP1;
 
 import invengo.javaapi.handle.EventArgs;
 import invengo.javaapi.handle.IEventHandle;
-import invengo.javaapi.protocol.IRP1.BaseMessage;
-import invengo.javaapi.protocol.IRP1.MessageType;
-import invengo.javaapi.protocol.IRP1.Reader;
 
 public class PowerOff extends BaseMessage implements IEventHandle {
 
@@ -19,7 +16,6 @@ public class PowerOff extends BaseMessage implements IEventHandle {
 			super.msgType = MessageType.msgClass.get("PowerOff_800");
 		} else {
 			super.msgType = MessageType.msgClass.get("PowerOff_500");
-
 		}
 	}
 
