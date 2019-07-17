@@ -30,9 +30,6 @@ public abstract class BaseReader implements IMsgReceivedHandle, IApiExceptionHan
 	public String portType = "RS232";
 	public String protocolVersion = "IRP2";
 	public String connStr;
-	/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-	public Activity context;
-	*/
 	public ReaderChannelType channelType;
 
 	public static final String ACTION_READER_CONNECTED = "invengo.javaapi.core.BaseReader.ACTION_READER_CONNECTED";
@@ -130,21 +127,6 @@ public abstract class BaseReader implements IMsgReceivedHandle, IApiExceptionHan
 		this.portType = "TCPIP_Server";
 	}
 
-	/**
-	 * BLE
-	 */
-	/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-	public BaseReader(String readerName, String protocolVersion, String portType,
-					  String connStr, Activity context, ReaderChannelType channelType) {
-		this.readerName = readerName;
-		this.protocolVersion = protocolVersion;
-		this.portType = portType;
-		this.connStr = connStr;
-		this.context = context;
-		this.channelType = channelType;
-	}
-	*/
-
 	public boolean connect() {
 		if (!isExistReaderConfig) {
 			Util.logAndTriggerApiErr(readerName, "FF18", readerName, LogType.Error);
@@ -152,19 +134,11 @@ public abstract class BaseReader implements IMsgReceivedHandle, IApiExceptionHan
 		}
 		String connClassName = this.portType;
 		try {
-			/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-			if(null != this.context){//BLE
-				iComm = CommunicationFactory.createCommunication(connClassName, this.context);
-			}else{
-			*/
-				if (server != null) {
-					iComm = CommunicationFactory.createCommunication(connClassName, server);
-				} else {
-					iComm = CommunicationFactory.createCommunication(connClassName);
-				}
-			/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
+			if (server != null) {
+				iComm = CommunicationFactory.createCommunication(connClassName, server);
+			} else {
+				iComm = CommunicationFactory.createCommunication(connClassName);
 			}
-			*/
 		} catch (Exception e) {
 			Util.logAndTriggerApiErr(readerName, "FF12", e.getMessage(), LogType.Fatal);
 			return false;
@@ -185,18 +159,10 @@ public abstract class BaseReader implements IMsgReceivedHandle, IApiExceptionHan
 					connStr = "";
 				}
 				boolean opened = iComm.open(connStr);
-				//				InvengoLog.e(TAG, "ERROR. serial port open {%s}", opened);
-				/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-				if(null == this.context){
-				*/
-					if (opened) {
-						return doAfterActuallyConnect();
-					}
-				/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-				}else {//BLE
-					return opened;
+				//InvengoLog.e(TAG, "ERROR. serial port open {%s}", opened);
+				if (opened) {
+					return doAfterActuallyConnect();
 				}
-				*/
 			} catch (Exception e) {
 				Util.logAndTriggerApiErr(readerName, "FF19", readerName + ":" + e.getMessage(), LogType.Error);
 				return false;
@@ -219,12 +185,7 @@ public abstract class BaseReader implements IMsgReceivedHandle, IApiExceptionHan
 			return true;
 		}
 
-		if(
-			/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-			null != this.context ||
-			*/
-			iComm instanceof Bluetooth
-		){//BLE or bluetooth
+		if(iComm instanceof Bluetooth){//BLE or bluetooth
 			//校时
 			verifyRfidTime();
 			if(null == getChannelType()){

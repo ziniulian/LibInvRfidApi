@@ -1,5 +1,19 @@
 ﻿Invengo Android版RFID类库
 
+V0.0.4 ：
+完成日期 ： 2019-7-17 17:00
+完成人：李泽荣
+	1. Ble 将连接超时改为 2 秒。
+	2. Ble 处理 onDisConnected 时，调用读写器的断开方法
+	3. Reader、BaseReader、ICommunication、CommunicationFactory 删除之前注释掉的无用代码
+
+V0.0.3 ：
+完成日期 ： 2019-7-15 17:00
+完成人：李泽荣
+	1. Ble 删除所有 Log 输出。
+	2. Ble 连接与断开时不再发送上电、断电信号。
+	3. 扫描设备调整为 2 秒；连接调整为 10 秒
+
 V0.0.2 ：
 完成日期 ： 2019-7-15 17:00
 完成人 ： 李泽荣

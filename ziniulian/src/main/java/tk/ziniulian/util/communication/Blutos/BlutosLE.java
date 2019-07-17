@@ -12,7 +12,6 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,9 @@ import java.util.UUID;
 
 import static android.content.Context.BLUETOOTH_SERVICE;
 import static tk.ziniulian.util.Str.Hexstr2Bytes;
+import static tk.ziniulian.util.communication.Blutos.EmBlutos.COT_ERR;
 import static tk.ziniulian.util.communication.Blutos.EmBlutos.COT_ING;
+import static tk.ziniulian.util.communication.Blutos.EmBlutos.COT_SRVING;
 import static tk.ziniulian.util.communication.Blutos.EmBlutos.SCANING;
 
 /**
@@ -30,6 +31,7 @@ import static tk.ziniulian.util.communication.Blutos.EmBlutos.SCANING;
  */
 
 public class BlutosLE {
+	private BluetoothManager bm = null;
 	private BluetoothAdapter ba = null;        // 蓝牙句柄
 	private EmBlutos stu = null;	// 状态
 	private InfBlutosEvt evt;		// 事件
@@ -60,7 +62,7 @@ public class BlutosLE {
 	// 开启蓝牙
 	public void bld(Activity a) {
 		if (stu == EmBlutos.BINDED) {
-			BluetoothManager bm = (BluetoothManager) a.getSystemService(BLUETOOTH_SERVICE);
+			bm = (BluetoothManager) a.getSystemService(BLUETOOTH_SERVICE);
 			ba = bm.getAdapter();
 			if (ba == null) {
 				stu = EmBlutos.BLD_NONE;    // 没有蓝牙
@@ -102,7 +104,7 @@ public class BlutosLE {
 		closeDevice();
 		if (stu == EmBlutos.BLD_OK) {
 			stu = SCANING;
-			ba.startLeScan(scb);    // 开始扫描 。 暂不知此操作是异步的还是同步的。
+			ba.startLeScan(scb);    // 开始扫描 。 安卓7.0，限制30秒内，最多连接5次。
 			if (t != 0) {
 				scb.autoStop(t, 1);    // t 毫秒后自动停止扫描
 			}
@@ -195,21 +197,24 @@ public class BlutosLE {
 	public void closeDevice() {
 		if (bg != null) {
 			bg.disconnect();
-			bg.close();
-			bg = null;
-			EmBlutos e = stu;
-			stu = EmBlutos.BLD_OK;
-			switch (e) {
-				case COT_OK:
-					evt.onDisConnected(this);
-					break;
-				case COT_ING:
-					evt.onErr(this, EmBlutos.COT_ERR);
-					break;
-				case COT_ERRNTF:
-				case WRT_ERR:
-					evt.onErr(this, e);
-					break;
+			if (bg != null) {	// 不知为何，此处经常会报空指针异常，故需加以判断。
+				bg.close();
+				bg = null;
+				EmBlutos e = stu;
+				stu = EmBlutos.BLD_OK;
+				switch (e) {
+					case COT_OK:
+						evt.onDisConnected(this);
+						break;
+					case COT_ING:
+					case COT_ERR:
+						evt.onErr(this, EmBlutos.COT_ERR);
+						break;
+					case COT_ERRNTF:
+					case WRT_ERR:
+						evt.onErr(this, e);
+						break;
+				}
 			}
 		}
 		stopScanDevice();
@@ -335,6 +340,7 @@ public class BlutosLE {
 		public StopRa start() {
 			stop();
 			t = new Thread(this);
+			t.start();
 			return this;
 		}
 
@@ -393,25 +399,24 @@ public class BlutosLE {
 			this.self = b;
 		}
 
-		@Override
-		public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-			super.onReadRemoteRssi(gatt, rssi, status);
-			Log.i("-----77----", rssi + " , " + status);
-		}
-
 		// 断开或连接 状态发生变化时调用
 		@Override
 		public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+//Log.i("------", "001 , " + status + " , " + newState);
 			if (status == BluetoothGatt.GATT_SUCCESS) {	// 连接成功
 				switch (newState) {
-					case BluetoothGatt.STATE_CONNECTED :	// 已连接
+					case BluetoothProfile.STATE_CONNECTED :	// 已连接
+						stu = COT_SRVING;
 						gatt.discoverServices();	// 开始发现服务
 						break;
 					case BluetoothProfile.STATE_DISCONNECTED:
 						closeDevice();
 						break;
 				}
-			}else{	// 连接失败
+			} else {	// 连接失败
+				if (status == BluetoothProfile.GATT_SERVER && newState == BluetoothProfile.STATE_DISCONNECTED) {
+					stu = COT_ERR;	// 蓝牙异常中断
+				}
 				closeDevice();
 			}
 
@@ -426,25 +431,29 @@ public class BlutosLE {
 			new Thread() {
 				@Override
 				public void run() {
-					BluetoothGattService srv = bg.getService(srvUid);
-					BluetoothGattCharacteristic ntfBgc = srv.getCharacteristic(ntfUid);
-					if (ntfBgc != null) {
-						if (bg.setCharacteristicNotification(ntfBgc, true)) {	// 设置 Notify Characteristic 的回调
-							BluetoothGattDescriptor bgd = ntfBgc.getDescriptor(ntfDecUid);	// 获取 Descriptor
-							if (bgd != null) {
-								bgd.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);	// 设置 Descriptor 可以返回消息
-								if (bg.writeDescriptor(bgd)) {
-									wrtChr = srv.getCharacteristic(wrtUid);	// 获取 Write Characteristic
-									if (wrtChr != null) {
-										stu = EmBlutos.COT_OK;
-										evt.onConnected(self);
-										return;
+					if (bg != null) {
+						BluetoothGattService srv = bg.getService(srvUid);
+						if (srv != null) {
+							BluetoothGattCharacteristic ntfBgc = srv.getCharacteristic(ntfUid);
+							if (ntfBgc != null) {
+								if (bg.setCharacteristicNotification(ntfBgc, true)) {	// 设置 Notify Characteristic 的回调
+									BluetoothGattDescriptor bgd = ntfBgc.getDescriptor(ntfDecUid);	// 获取 Descriptor
+									if (bgd != null) {
+										bgd.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);	// 设置 Descriptor 可以返回消息
+										if (bg.writeDescriptor(bgd)) {
+											wrtChr = srv.getCharacteristic(wrtUid);	// 获取 Write Characteristic
+											if (wrtChr != null) {
+												stu = EmBlutos.COT_OK;
+												evt.onConnected(self);
+												return;
+											}
+										}
 									}
 								}
 							}
 						}
+						closeDevice();
 					}
-					closeDevice();
 				}
 			}.start();
 

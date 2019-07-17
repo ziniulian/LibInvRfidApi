@@ -1,5 +1,20 @@
 ﻿子牛连 Java通用工具
 
+V0.0.4 ：
+完成日期 ： 2019-7-17 17:00
+完成人 ： 李泽荣
+	1. BlutosLE onConnectionStateChange 关于蓝牙异常中断，发出对应的异常信息。
+	2. BlutosLE 将 BluetoothManager 设为类属性
+	3. BlutosLE closeDevice 加入空指针判断
+	4. EmBlutos 添加服务发现状态
+
+V0.0.3 ：
+完成日期 ： 2019-7-15 17:00
+完成人 ： 李泽荣
+	1. BlutosLE 屏蔽 onReadRemoteRssi 事件
+	2. 修正 BlutosLE.StopRa.start 方法未启动线程的 BUG
+	3. BlutosLE onServicesDiscovered 报空指针的处理
+
 V0.0.2 ：
 完成日期 ： 2019-7-15 17:00
 完成人 ： 李泽荣

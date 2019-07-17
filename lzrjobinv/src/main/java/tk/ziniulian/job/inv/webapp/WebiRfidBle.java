@@ -48,6 +48,11 @@ public class WebiRfidBle extends WebiRfid {
 	}
 
 	@JavascriptInterface
+	public String getDevAdr () {
+		return ((RdBle)rfd).getDevAdr();
+	}
+
+	@JavascriptInterface
 	public void scanDevice () {
 		b.scanDevice();
 	}

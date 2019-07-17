@@ -35,15 +35,4 @@ public class CommunicationFactory {
 		 iConn.setSocket(socket);
 		 return iConn;
      }
-	 
-	 /**
-	  * BLE
-	  */
-	/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-	public static ICommunication createCommunication(String connClassName, Activity context){
-		 ICommunication iConn = createCommunication(connClassName);
-		 iConn.setContext(context);
-		 return iConn;
-	 }
-	 */
 }

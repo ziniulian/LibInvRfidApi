@@ -58,17 +58,6 @@ public class Reader extends BaseReader implements
 		return isRssiEnable;
 	}
 
-	/**
-	 * BLE
-	 */
-	/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-	public Reader(String readerName, String portType, String connStr, Activity context, ReaderChannelType channelType) {
-		super(readerName, "IRP1", portType, connStr, context, channelType);
-		super.onMessageNotificationReceived.add(this);
-		registerBluetoothBroadcastReceiver();
-	}
-	*/
-
 	// BLE
 	public Reader(String readerName, String connStr, Ble b) {
 		super(readerName, "IRP1", "RS232", connStr);
@@ -173,24 +162,17 @@ public class Reader extends BaseReader implements
 
 		boolean isConn = super.connect();
 
-		// TODO: 2019/7/10 目前为测试过程，暂时保留。在下一版本中取消所有类似注释
-		/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-		if(null == super.context){
-		*/
-			if (isConn) {
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-				}
-				doRssiUtcQuery();
-			}else{
-				InvengoLog.e(TAG, "ERROR. connect() - Faield to connect device");
-				disConnect();
-				isConn = false;
+		if (isConn) {
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
 			}
-		/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
+			doRssiUtcQuery();
+		}else{
+			InvengoLog.e(TAG, "ERROR. connect() - Faield to connect device");
+			disConnect();
+			isConn = false;
 		}
-		*/
 		return isConn;
 	}
 
@@ -239,58 +221,6 @@ public class Reader extends BaseReader implements
 		}
 	}
 
-	/*
-	 * Start.BLE连接处理
-	 */
-	/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-	private BluetoothLEBroadcastReceiver mBluetoothChangeReceiver = null;
-	private IntentFilter mAclConnectFilter = null;
-	private IntentFilter mAclDisconnectFilter = null;
-	private void registerBluetoothBroadcastReceiver() {
-		InvengoLog.i(TAG, "INFO.Register broadcast.");
-		mAclConnectFilter = new IntentFilter(BluetoothLET.ACTION_GATT_CONNECTED);
-		mAclDisconnectFilter = new IntentFilter(BluetoothLET.ACTION_GATT_DISCONNECTED);
-		mBluetoothChangeReceiver = new BluetoothLEBroadcastReceiver();
-		super.context.registerReceiver(mBluetoothChangeReceiver, mAclConnectFilter);
-		super.context.registerReceiver(mBluetoothChangeReceiver, mAclDisconnectFilter);
-	}
-
-	private class BluetoothLEBroadcastReceiver extends BroadcastReceiver{
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			if(action.equals(BluetoothLET.ACTION_GATT_CONNECTED)){
-				try {
-					Thread.sleep(1 * 100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				if(doAfterActuallyConnect()){
-					InvengoLog.i(TAG, "doAfterActuallyConnect.True");
-					doRssiUtcQuery();
-					sendBroadcast(ACTION_READER_CONNECTED);
-				}else {
-					sendBroadcast(ACTION_READER_DISCONNECTED);
-					disConnect();
-				}
-			}else if(action.equals(BluetoothLET.ACTION_GATT_DISCONNECTED)){
-				sendBroadcast(ACTION_READER_DISCONNECTED);
-				disConnect();
-			}
-		}
-	}
-
-	private void sendBroadcast(String action) {
-		Intent broadcastIntent = new Intent(action);
-		super.context.sendBroadcast(broadcastIntent);
-	}
-	*/
-	/*
-	 * End.BLE连接处理
-	 */
-
-
 	@Override
 	public void disConnect() {
 		if(isConnected()){
@@ -298,14 +228,6 @@ public class Reader extends BaseReader implements
 			super.disConnect();
 			// Device Power Off
 			powerControl(false);
-			/* 2019-7-4 李泽荣 ： 使用新的BLE连接类，无需此功能。
-			if(null != super.context){
-				if(null != mBluetoothChangeReceiver){
-					super.context.unregisterReceiver(mBluetoothChangeReceiver);
-					mBluetoothChangeReceiver = null;
-				}
-			}
-			*/
 		}
 	}
 

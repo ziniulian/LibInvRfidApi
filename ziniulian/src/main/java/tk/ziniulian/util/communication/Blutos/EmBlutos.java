@@ -13,6 +13,7 @@ public enum EmBlutos {
 	BLD_OK(""),		// 蓝牙设备已开启
 	SCANING(""),	// 正在扫描蓝牙设备
 	COT_ING(""),	// 正在连接
+	COT_SRVING(""),	// 正在发现服务
 	COT_OK(""),		// 连接成功
 	COT_ERR("连接失败"),		// 连接失败
 	COT_ERRNTF("监听失败"),	// 未能成功设置连接的监听回调

@@ -11,7 +11,7 @@ import tk.ziniulian.job.inv.rfid.EmCb;
 
 public class RdBle extends Rd {
 	private Ble b;
-	private String devAdr;
+	private String devAdr = "";
 
 	// 连接设备
 	private Runnable connectRaBle = new Runnable() {
@@ -54,6 +54,10 @@ public class RdBle extends Rd {
 
 //			new Thread(connectRaBle).start();	// BLE 的开关尽量放在主线程中执行
 		}
+	}
+
+	public String getDevAdr() {
+		return devAdr;
 	}
 
 	public RdBle setDevAdr(String devAdr) {
