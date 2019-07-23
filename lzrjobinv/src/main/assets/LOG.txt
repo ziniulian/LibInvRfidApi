@@ -1,5 +1,14 @@
 ﻿子牛连 INV 工具
 
+V0.0.5 ：
+完成日期 ： 2019-7-23 17:00
+完成人：李泽荣
+	1. Rd ： 不再使用 EPC_TID_UserData_6C 。将 EPC_TID_UserData_6C 改为 EPC_TID_UserData_6C_2。
+	2. T6C : 加入 TID 、用户区 的读取长度，用户区的起始位置
+	3. T6BigPaper : 添加本次测试用的 大纸标签
+	4. Rd,scanRa : 通用读时，设置TID长度和用户区长度
+	5. WebiRfid : 添加获取读写器方法
+
 V0.0.4 ：
 完成日期 ： 2019-7-17 17:00
 完成人：李泽荣

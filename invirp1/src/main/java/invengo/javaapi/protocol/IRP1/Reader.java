@@ -78,7 +78,12 @@ public class Reader extends BaseReader implements
 			return;
 		}
 		RXD_TagData rxdMsg = new RXD_TagData((Reader) reader, msg);
-		if (!rxdMsg.getReceivedMessage().getTagType().equals("")) {
+		RXD_TagData.ReceivedInfo rif = rxdMsg.getReceivedMessage();
+		if (rif == null) {
+//android.util.Log.i("----- 解析错误的数据 -----", Bytes2Hexstr(msg.getReceivedData()));
+			return;
+		}
+		if (!rif.getTagType().equals("")) {
 			synchronized (lockinfo) {
 				if (this.info != null) {
 					if (this.info.isGetOneTag && !this.info.isDone) {

@@ -14,14 +14,15 @@ public class T6C {
 	private byte[] use = null;
 	private byte[] bck = null;
 
-	private int ewl = 0;
-	private int twl = 0;
-	private int uwl = 0;
-	private int bwl = 0;
-	private int erl = 0;
-	private int trl = 0;
-	private int url = 0;
-	private int brl = 0;
+	protected int ewl = 0;
+	protected int twl = 0;
+	protected int uwl = 0;
+	protected int bwl = 0;
+	protected int erl = 0;
+	protected int trl = 0;
+	protected int upt = 0;	// 用户区起始位置
+	protected int url = 0;
+	protected int brl = 0;
 
 	private int tim = 1;	// 标签扫描到的次数
 
@@ -233,4 +234,21 @@ public class T6C {
 		setBck(ri.getReserved());
 	}
 
+	// 获取TID的读取长度（单位：字，双字节）
+	public byte getTidWord () {
+		int r = trl / 2;
+		return (byte)r;	// 整除
+	}
+
+	// 获取用户区的读取长度（单位：字，双字节）
+	public byte getUseWord () {
+		int r = url / 2;
+		return (byte)r;	// 整除
+	}
+
+	// 获取用户区的起始位置（单位：字，双字节）
+	public byte getUptWord () {
+		int r = upt / 2;
+		return (byte)r;	// 整除
+	}
 }

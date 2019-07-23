@@ -30,6 +30,11 @@ public class WebiRfid {
 		rfd.setHex(true);
 	}
 
+	// 获取读写器
+	public Rd getRd () {
+		return rfd;
+	}
+
 	// 读写器设置
 	public void initRd () {
 		crtRd();

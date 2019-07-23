@@ -19,7 +19,11 @@ public class RXD_TagData extends BaseMessageNotification {
 	}
 
 	public ReceivedInfo getReceivedMessage() {
-		return new ReceivedInfo(null, reader, msg);
+		try {
+			return new ReceivedInfo(null, reader, msg);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	public class ReceivedInfo extends invengo.javaapi.core.ReceivedInfo {

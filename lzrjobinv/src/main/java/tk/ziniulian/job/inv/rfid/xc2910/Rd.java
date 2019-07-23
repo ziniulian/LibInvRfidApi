@@ -20,6 +20,8 @@ import tk.ziniulian.job.inv.rfid.tag.T6C;
 import tk.ziniulian.job.inv.rfid.tag.T6Ctemperature;
 import tk.ziniulian.util.Str;
 
+import static invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank.EPC_TID_UserData_6C_2;
+
 /**
  * XC2910型标签读写器
  * Created by LZR on 2017/8/9.
@@ -31,7 +33,7 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 	protected boolean isScanning = false;
 	protected boolean isReading = false;
 	private final byte antenna = 1;
-	private ReadTag.ReadMemoryBank bank = ReadTag.ReadMemoryBank.EPC_TID_UserData_6C;
+	private ReadTag.ReadMemoryBank bank = EPC_TID_UserData_6C_2;
 	private final byte[] defaulPwd = new byte[] {0, 0, 0, 0};
 	private byte[] pwd = null;
 	private Class tagc = T6C.class;
@@ -71,6 +73,16 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 		@Override
 		public void run() {
 			ReadTag rt = new ReadTag (bank);
+			if (bank == EPC_TID_UserData_6C_2) {
+				try {
+					T6C bt = (T6C) tagc.newInstance();
+					rt.setTidLen(bt.getTidWord());
+					rt.setUserDataPtr_6C(bt.getUptWord());
+					rt.setUserDataLen_6C(bt.getUseWord());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			rd.send(rt);
 			cb(EmCb.Scanning);
 		}
@@ -99,7 +111,8 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 				isReading = false;
 				cb(EmCb.ErrRead);
 			}
-		}	};
+		}
+	};
 
 	// 写标签
 	private class WrtRa implements Runnable {
@@ -294,7 +307,7 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 		} else if (bankNam.equals("tid")) {
 			bank = ReadTag.ReadMemoryBank.TID_6C;
 		} else if ((bankNam.equals("use")) || (bankNam.equals("all"))) {
-			bank = ReadTag.ReadMemoryBank.EPC_TID_UserData_6C;
+			bank = EPC_TID_UserData_6C_2;
 		} else if (bankNam.equals("bck")) {
 			bank = ReadTag.ReadMemoryBank.EPC_TID_UserData_Reserved_6C_ID_UserData_6B;
 		} else if (bankNam.equals("tmp")) {
@@ -304,8 +317,6 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 		}
 		if (bankNam.equals("tmp")) {
 			tagc = T6Ctemperature.class;
-		} else {
-			tagc = T6C.class;
 		}
 		return true;
 	}
@@ -317,7 +328,7 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 				return "epc";
 			case TID_6C:
 				return "tid";
-			case EPC_TID_UserData_6C:
+			case EPC_TID_UserData_6C_2:
 				return "use";
 			case EPC_TID_UserData_Reserved_6C_ID_UserData_6B:
 				return "bck";
@@ -343,6 +354,11 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 
 	public Rd setPwd(byte[] pwd) {
 		this.pwd = pwd;
+		return this;
+	}
+
+	public Rd setTagc(Class tagc) {
+		this.tagc = tagc;
 		return this;
 	}
 

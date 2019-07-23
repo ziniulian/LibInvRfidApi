@@ -1,5 +1,12 @@
 ﻿Invengo Android版RFID类库
 
+V0.0.5 ：
+完成日期 ： 2019-7-23 17:00
+完成人：李泽荣
+	1. ICommunication 取消测试的输出信息
+	2. RXD_TagData.getReceivedMessage : 处理数据解析报错问题
+	3. Reader.messageNotificationReceivedHandle : 处理数据解析报错问题
+
 V0.0.4 ：
 完成日期 ： 2019-7-17 17:00
 完成人：李泽荣

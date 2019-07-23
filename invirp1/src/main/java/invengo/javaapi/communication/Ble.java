@@ -87,6 +87,7 @@ public class Ble extends ICommunication {
 
 			@Override
 			public void onReceive(BlutosLE self, byte[] dat) {
+//Log.i("-- 接收的信息 ： --", Bytes2Hexstr(dat));
 				setBufferQueue(dat);
 			}
 		});
