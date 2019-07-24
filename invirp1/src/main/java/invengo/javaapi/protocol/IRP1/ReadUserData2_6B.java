@@ -1,15 +1,13 @@
 package invengo.javaapi.protocol.IRP1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.Util;
 import invengo.javaapi.handle.EventArgs;
 import invengo.javaapi.handle.IEventHandle;
-import invengo.javaapi.protocol.IRP1.BaseMessage;
-import invengo.javaapi.protocol.IRP1.Decode;
 import invengo.javaapi.protocol.receivedInfo.ReadUserDataNonFixed6BReceivedInfo;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 读用户数据区指令(读变长)

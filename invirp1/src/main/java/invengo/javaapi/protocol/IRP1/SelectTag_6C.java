@@ -1,9 +1,7 @@
 package invengo.javaapi.protocol.IRP1;
 
-import invengo.javaapi.core.MemoryBank;
 import invengo.javaapi.core.BaseReader;
-import invengo.javaapi.protocol.IRP1.BaseMessage;
-import invengo.javaapi.protocol.IRP1.EVB;
+import invengo.javaapi.core.MemoryBank;
 
 /**
  * 标签选择指令

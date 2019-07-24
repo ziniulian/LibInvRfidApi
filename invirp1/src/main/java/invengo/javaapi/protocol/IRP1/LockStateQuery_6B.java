@@ -3,9 +3,6 @@ package invengo.javaapi.protocol.IRP1;
 import invengo.javaapi.core.Util;
 import invengo.javaapi.handle.EventArgs;
 import invengo.javaapi.handle.IEventHandle;
-import invengo.javaapi.protocol.IRP1.BaseMessage;
-import invengo.javaapi.protocol.IRP1.Decode;
-import invengo.javaapi.protocol.IRP1.Reader;
 
 public class LockStateQuery_6B extends BaseMessage implements IEventHandle {
 

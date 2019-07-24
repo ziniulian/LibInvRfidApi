@@ -2,6 +2,8 @@ package invengo.javaapi.core;
 
 import java.net.Socket;
 
+import android.app.Activity;
+
 public class CommunicationFactory {
 
 	public static ICommunication createCommunication(String connClassName) {
@@ -35,4 +37,13 @@ public class CommunicationFactory {
 		 iConn.setSocket(socket);
 		 return iConn;
      }
+	 
+	 /**
+	  * BLE
+	  */
+	public static ICommunication createCommunication(String connClassName, Activity context){
+		 ICommunication iConn = createCommunication(connClassName);
+		 iConn.setContext(context);
+		 return iConn;
+	 }
 }

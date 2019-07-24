@@ -1,13 +1,13 @@
 package invengo.javaapi.protocol.IRP1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import invengo.javaapi.core.IMessage;
 import invengo.javaapi.core.IMessageNotification;
 import invengo.javaapi.core.IProcess;
 import invengo.javaapi.core.Log;
 import invengo.javaapi.core.Util;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Decode implements IProcess {
 
@@ -17,7 +17,8 @@ public class Decode implements IProcess {
 	volatile boolean is56 = false;
 
 	public IMessage getConnectMessage() {
-		return new Gpi_800((byte) 0x00);
+		return null;
+		//		return new Gpi_800((byte) 0x00);
 	}
 
 	public IMessage getDisconnectMessage() {

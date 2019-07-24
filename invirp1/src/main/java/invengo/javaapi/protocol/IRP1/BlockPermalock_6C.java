@@ -3,8 +3,6 @@ package invengo.javaapi.protocol.IRP1;
 import invengo.javaapi.core.MemoryBank;
 import invengo.javaapi.handle.EventArgs;
 import invengo.javaapi.handle.IEventHandle;
-import invengo.javaapi.protocol.IRP1.BaseMessage;
-import invengo.javaapi.protocol.IRP1.EVB;
 
 /**
  * 块永久锁指令

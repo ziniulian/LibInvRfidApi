@@ -66,23 +66,35 @@ final class ErrorInfo {
 			errMap.put("FF30", "数据接收失败。");
 		} else {
 			/* 读写器系统错误代码表 */
-			errMap.put("FF", "Directive does not receive a response within the time specified in the. Possible reasons for reader communication failure or timeout is too short.");
+			errMap
+					.put(
+							"FF",
+							"Directive does not receive a response within the time specified in the. Possible reasons for reader communication failure or timeout is too short.");
 			/* 读写器操作错误代码表 */
 			errMap.put("12", "Erroneous antenna Number.");
 			errMap.put("15", "Reader is on tag operation.");
 			errMap.put("18", "Reserve");
 			errMap.put("1A", "SWR too big.");
-			errMap.put("1F", "The error belongs to this spectrum, but is unrecognizable by the READER or occured for unknown reason");
+			errMap
+					.put(
+							"1F",
+							"The error belongs to this spectrum, but is unrecognizable by the READER or occured for unknown reason");
 			/* 指令接收/数据传输错误代码表 */
 			errMap.put("20", "received command or data is incomplete.");
 			errMap.put("21", "received command or data CRC check error.");
-			errMap.put("22", "Command type is not correspond to current reader type.");
-			errMap.put("23", "Command type is not correspond to protocol of current tags.");
+			errMap.put("22",
+					"Command type is not correspond to current reader type.");
+			errMap
+					.put("23",
+							"Command type is not correspond to protocol of current tags.");
 			errMap.put("24", "Command parameter table error.");
 			errMap.put("25", ">Command data structure error.");
 			errMap.put("26", "Command error.");
 			errMap.put("27", "The reader is busy now. Please try again later.");
-			errMap.put("2F", "The error belongs to this spectrum, but is unrecognizable by the READER or occured for unknown reason");
+			errMap
+					.put(
+							"2F",
+							"The error belongs to this spectrum, but is unrecognizable by the READER or occured for unknown reason");
 			/* EPC标签操作错误代码表 */
 			errMap.put("60", "No tag response,or the tag is absent.");
 			errMap.put("62", "Tag feedback: operation address overflow.");
@@ -91,14 +103,20 @@ final class ErrorInfo {
 			errMap.put("65", "Tag destroy password error.");
 			errMap.put("69", "Unknown error.");
 			errMap.put("6A", "Tag feedback: Power Deficiency.");
-			errMap.put("6F", "The error belongs to this spectrum, but is unrecognizable by the READER or occured for unknown reason");
+			errMap
+					.put(
+							"6F",
+							"The error belongs to this spectrum, but is unrecognizable by the READER or occured for unknown reason");
 			/* XCRF-500系列错误代码表 */
 			errMap.put("3F", "Data check error.");
 			errMap.put("3A", "Data check error.");
 			/* API运行错误代码表 */
 			errMap.put("FF04", ">This port is occupied.");
 			errMap.put("FF05", "Send COM command failed.");
-			errMap.put("FF06", "Errors.Please choose the right serial number or restart the reader and program.");
+			errMap
+					.put(
+							"FF06",
+							"Errors.Please choose the right serial number or restart the reader and program.");
 			errMap.put("FF07", "Send TCP command failed.");
 			errMap.put("FF08", "No command.");
 			errMap.put("FF09", "The network is disconnected.Please check.");
@@ -109,8 +127,11 @@ final class ErrorInfo {
 			errMap.put("FF14", "Cannot add a blank node.");
 			errMap.put("FF15", "The target node already exists.");
 			errMap.put("FF16", "The target node does not exist.");
-			errMap.put("FF17", "Log failed: can not use the released resources.");
-			errMap.put("FF18", "The reader configuration item does not exist in the configuration file.");
+			errMap.put("FF17",
+					"Log failed: can not use the released resources.");
+			errMap
+					.put("FF18",
+							"The reader configuration item does not exist in the configuration file.");
 			errMap.put("FF19", "Connecte failure.");
 			errMap.put("FF20", "The RS232 data recv failure.");
 			errMap.put("FF21", "Send data failure.");
@@ -118,7 +139,8 @@ final class ErrorInfo {
 			errMap.put("FF23", "Data to send cannot be blank.");
 			errMap.put("FF24", "There may be other user connecting.");
 			errMap.put("FF25", "Intermittent read abnormal exit.");
-			errMap.put("FF26", "OnExecuting failed,stop executing instructions.");
+			errMap.put("FF26",
+					"OnExecuting failed,stop executing instructions.");
 			errMap.put("FF30", "Receive data failure.");
 		}
 	}

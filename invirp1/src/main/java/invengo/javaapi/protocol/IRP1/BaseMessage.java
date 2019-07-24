@@ -76,7 +76,6 @@ public abstract class BaseMessage extends MessageFrame implements IMessage {
 		this.timeout = timeOut;
 	}
 
-	// 拼接二进制码，结果为真正要发送的二进制码
 	public byte[] getTransmitterData() {
 		msgID = super.msgType;
 		int len = 1;

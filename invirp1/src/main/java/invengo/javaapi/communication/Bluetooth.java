@@ -4,12 +4,15 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
+import com.invengo.lib.diagnostics.InvengoLog;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
 import invengo.javaapi.core.ICommunication;
+import invengo.javaapi.core.Util;
 
 public class Bluetooth extends ICommunication {
 
@@ -125,7 +128,6 @@ public class Bluetooth extends ICommunication {
 		if (data != null) {
 			try {
 				if (super.isConnected()) {
-					//	            	InvengoLog.i("Response", "INFO.Message Send - " + Util.convertByteArrayToHexString(data));
 					bluetoothSend(data);// 发送
 					sl = data.length;
 				}
@@ -180,6 +182,8 @@ public class Bluetooth extends ICommunication {
 	private void bluetoothSend(byte[] sendMsg) throws Exception {
 		synchronized (lockObj) {
 			writer.write(sendMsg, 0, sendMsg.length);// 发送
+			InvengoLog.i("Bluetooth Send", "INFO.Message Send - " + Util.convertByteArrayToHexString(sendMsg));
+
 		}
 	}
 

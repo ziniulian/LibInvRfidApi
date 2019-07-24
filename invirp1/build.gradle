@@ -29,6 +29,10 @@ android {
 }
 
 dependencies {
+//    compile files('../app/libs/jar/My/android/com/ziniulian.util.jar')
+//    compile files('../app/libs/jar/Invengo/android/com/invengo.util.jar')
+//    compile files('../app/libs/jar/Invengo/android/com/invengo.system.device.jar')
+//    compile files('../app/libs/jar/Invengo/android/com/invengo.system.ctrl.jar')
     compile project(':invsysctrl')
     compile project(':ziniulian')
     compile files('libs/ch.ntb.usb-0.5.9.jar')

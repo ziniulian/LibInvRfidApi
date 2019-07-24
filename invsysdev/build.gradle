@@ -22,6 +22,7 @@ android {
 }
 
 dependencies {
+//    compile files('../app/libs/jar/Invengo/android/com/invengo.util.jar')
     compile project(':invutil')
 }
 

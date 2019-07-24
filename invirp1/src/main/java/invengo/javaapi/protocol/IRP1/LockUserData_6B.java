@@ -4,7 +4,6 @@ import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.Util;
 import invengo.javaapi.handle.EventArgs;
 import invengo.javaapi.handle.IEventHandle;
-import invengo.javaapi.protocol.IRP1.BaseMessage;
 
 /**
  * 读用户数据区指令

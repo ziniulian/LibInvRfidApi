@@ -3,6 +3,7 @@ package invengo.javaapi.protocol.IRP1;
 import invengo.javaapi.core.MemoryBank;
 import invengo.javaapi.handle.EventArgs;
 import invengo.javaapi.handle.IEventHandle;
+import invengo.javaapi.protocol.IRP1.BaseMessage;
 
 /**
  * 写EPC数据指令
@@ -13,7 +14,7 @@ public class WriteEpc extends BaseMessage implements IEventHandle {
 	/**
 	 * @param antenna
 	 *            天线端口
-	 * @param accessPwd
+	 * @param pwd
 	 *            标签访问密码
 	 * @param epcData
 	 *            写入标签EPC数据

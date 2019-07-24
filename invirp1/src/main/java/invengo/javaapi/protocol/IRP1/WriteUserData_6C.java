@@ -1,12 +1,12 @@
 package invengo.javaapi.protocol.IRP1;
 
+import com.invengo.lib.diagnostics.InvengoLog;
+
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.MemoryBank;
 import invengo.javaapi.core.Util;
 import invengo.javaapi.handle.EventArgs;
 import invengo.javaapi.handle.IEventHandle;
-
-import com.invengo.lib.diagnostics.InvengoLog;
 
 /**
  * 写用户数据区指令

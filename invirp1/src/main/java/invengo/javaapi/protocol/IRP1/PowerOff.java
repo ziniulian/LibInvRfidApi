@@ -16,15 +16,16 @@ public class PowerOff extends BaseMessage implements IEventHandle {
 			super.msgType = MessageType.msgClass.get("PowerOff_800");
 		} else {
 			super.msgType = MessageType.msgClass.get("PowerOff_500");
+
 		}
 	}
 
 	public void eventHandle_executed(Object sender, EventArgs e) {
-		
+
 	}
 
 	public void eventHandle_executing(Object sender, EventArgs e) {
 		PowerOff_OnExecuting(sender, e);
-		
+
 	}
 }

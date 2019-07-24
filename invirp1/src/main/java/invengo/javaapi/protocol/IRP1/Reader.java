@@ -1,5 +1,11 @@
 package invengo.javaapi.protocol.IRP1;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+
 import com.invengo.lib.diagnostics.InvengoLog;
 import com.invengo.lib.system.ModuleControl;
 import com.invengo.lib.system.device.DeviceManager;
@@ -14,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import invengo.javaapi.communication.Ble;
+import invengo.javaapi.communication.BluetoothLE;
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessage;
 import invengo.javaapi.core.IMessageNotification;
@@ -22,7 +29,7 @@ import invengo.javaapi.core.Util.LogType;
 import invengo.javaapi.handle.IMessageNotificationReceivedHandle;
 
 /**
- * 适用设备类型为：XC2600
+ * 适用设备类型为：手环式读写器
  */
 public class Reader extends BaseReader implements
 		IMessageNotificationReceivedHandle {
@@ -35,8 +42,7 @@ public class Reader extends BaseReader implements
 	protected volatile boolean isStopReadTag = false;
 	private static int mWakeupCount = 0;
 
-	// BLE
-	private Ble bleIcomm = null;
+	private Ble bleIcomm = null;	// LZR_0.0.2
 
 	public List<IMessageNotificationReceivedHandle> onMessageNotificationReceived = new ArrayList<IMessageNotificationReceivedHandle>();
 
@@ -58,13 +64,23 @@ public class Reader extends BaseReader implements
 		return isRssiEnable;
 	}
 
-	// BLE
+	/**
+	 * BLE
+	 */
+	public Reader(String readerName, String portType, String connStr, Activity context) {
+		super(readerName, "IRP1", portType, connStr, context);
+		super.onMessageNotificationReceived.add(this);
+		registerBluetoothBroadcastReceiver();
+	}
+
+	/*** LZR_0.0.2 _ S ***/
 	public Reader(String readerName, String connStr, Ble b) {
 		super(readerName, "IRP1", "RS232", connStr);
 		b.setRd(this);
 		bleIcomm = b;
 		super.onMessageNotificationReceived.add(this);
 	}
+	/*** LZR_0.0.2 _ E ***/
 
 	public void messageNotificationReceivedHandle(BaseReader reader,
 												  IMessageNotification msg) {
@@ -78,12 +94,16 @@ public class Reader extends BaseReader implements
 			return;
 		}
 		RXD_TagData rxdMsg = new RXD_TagData((Reader) reader, msg);
+
+		/*** LZR_0.0.5 _ S ***/
 		RXD_TagData.ReceivedInfo rif = rxdMsg.getReceivedMessage();
 		if (rif == null) {
-//android.util.Log.i("----- 解析错误的数据 -----", Bytes2Hexstr(msg.getReceivedData()));
+//Log.i("-------", Bytes2Hexstr(msg.getReceivedData()));
 			return;
 		}
-		if (!rif.getTagType().equals("")) {
+		/*** LZR_0.0.5 _ E ***/
+
+		if (!rif.getTagType().equals("")) {		// LZR_0.0.5
 			synchronized (lockinfo) {
 				if (this.info != null) {
 					if (this.info.isGetOneTag && !this.info.isDone) {
@@ -152,7 +172,7 @@ public class Reader extends BaseReader implements
 			return true;
 		}
 
-		// BLE 连接
+		/*** LZR_0.0.2 _ S ***/
 		if (bleIcomm != null) {
 			try {
 				readerType = "800";	// 补充 doRssiUtcQuery(); 方法的执行
@@ -161,22 +181,24 @@ public class Reader extends BaseReader implements
 			} catch (Exception e) {}
 			return false;
 		}
+		/*** LZR_0.0.2 _ E ***/
 
 		// Device Power On
 		powerControl(true);
 
 		boolean isConn = super.connect();
-
-		if (isConn) {
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
+		if(null == super.context){
+			if (isConn) {
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+				}
+				doRssiUtcQuery();
+			}else{
+				InvengoLog.e(TAG, "ERROR. connect() - Faield to connect device");
+				disConnect();
+				isConn = false;
 			}
-			doRssiUtcQuery();
-		}else{
-			InvengoLog.e(TAG, "ERROR. connect() - Faield to connect device");
-			disConnect();
-			isConn = false;
 		}
 		return isConn;
 	}
@@ -226,6 +248,57 @@ public class Reader extends BaseReader implements
 		}
 	}
 
+	/*
+	 * Start.BLE连接处理
+	 */
+	private BluetoothLEBroadcastReceiver mBluetoothChangeReceiver = null;
+	private IntentFilter mAclConnectFilter = null;
+	private IntentFilter mAclDisconnectFilter = null;
+	private void registerBluetoothBroadcastReceiver() {
+		InvengoLog.i(TAG, "INFO.Register broadcast.");
+		mAclConnectFilter = new IntentFilter(BluetoothLE.ACTION_GATT_CONNECTED);
+		mAclDisconnectFilter = new IntentFilter(BluetoothLE.ACTION_GATT_DISCONNECTED);
+		mBluetoothChangeReceiver = new BluetoothLEBroadcastReceiver();
+		super.context.registerReceiver(mBluetoothChangeReceiver, mAclConnectFilter);
+		super.context.registerReceiver(mBluetoothChangeReceiver, mAclDisconnectFilter);
+	}
+
+	private class BluetoothLEBroadcastReceiver extends BroadcastReceiver{
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if(action.equals(BluetoothLE.ACTION_GATT_CONNECTED)){
+				try {
+					Thread.sleep(1 * 100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				if(doAfterActuallyConnect()){
+					InvengoLog.i(TAG, "doAfterActuallyConnect.True");
+					doRssiUtcQuery();
+					sendBroadcast(ACTION_READER_CONNECTED);
+				}else {
+					sendBroadcast(ACTION_READER_DISCONNECTED);
+					disConnect();
+				}
+			}else if(action.equals(BluetoothLE.ACTION_GATT_DISCONNECTED)){
+				sendBroadcast(ACTION_READER_DISCONNECTED);
+				disConnect();
+			}
+		}
+	}
+
+	private void sendBroadcast(String action) {
+		Intent broadcastIntent = new Intent(action);
+		super.context.sendBroadcast(broadcastIntent);
+	}
+
+	/*
+	 * End.BLE连接处理
+	 */
+
+
 	@Override
 	public void disConnect() {
 		if(isConnected()){
@@ -233,6 +306,12 @@ public class Reader extends BaseReader implements
 			super.disConnect();
 			// Device Power Off
 			powerControl(false);
+			if(null != super.context){
+				if(null != mBluetoothChangeReceiver){
+					super.context.unregisterReceiver(mBluetoothChangeReceiver);
+					mBluetoothChangeReceiver = null;
+				}
+			}
 		}
 	}
 
@@ -322,6 +401,8 @@ public class Reader extends BaseReader implements
 			case XC2903:
 			case XC2910_V3:
 				powerXC2900Device(enabled);
+				break;
+			case G6818:
 				break;
 			case Unknown://XC2600不做任何上电操作
 				break;

@@ -1,15 +1,15 @@
 package invengo.javaapi.communication;
 
-import invengo.javaapi.core.ICommunication;
-import invengo.javaapi.core.Log;
-import invengo.javaapi.core.Util;
-import invengo.javaapi.core.Util.LogType;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+
+import invengo.javaapi.core.ICommunication;
+import invengo.javaapi.core.Log;
+import invengo.javaapi.core.Util;
+import invengo.javaapi.core.Util.LogType;
 
 public class NetSocket extends ICommunication {
 

@@ -1,6 +1,6 @@
 package invengo.javaapi.core;
 
-import android.os.Environment;
+import invengo.javaapi.handle.LogChangeEventArgs;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import invengo.javaapi.handle.LogChangeEventArgs;
+import android.os.Environment;
 
 public class LogManager {
 
@@ -58,7 +58,7 @@ public class LogManager {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public void write(String msg, String logFlag) {
 
 		String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS").format(new Date());

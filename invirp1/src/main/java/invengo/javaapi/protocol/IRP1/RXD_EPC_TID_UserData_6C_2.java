@@ -1,8 +1,23 @@
 package invengo.javaapi.protocol.IRP1;
 
-import invengo.javaapi.core.Util;
-
 class RXD_EPC_TID_UserData_6C_2 extends BaseMessageNotification {
+
+	//XC-IUT1501-01芯片测温标签初始值及步进值
+	private int initValue = 30;
+	private int stepValue = 20;
+
+	public int getInitValue() {
+		return initValue;
+	}
+	public void setInitValue(int initValue) {
+		this.initValue = initValue;
+	}
+	public int getStepValue() {
+		return stepValue;
+	}
+	public void setStepValue(int stepValue) {
+		this.stepValue = stepValue;
+	}
 
 	public ReceivedInfo getReceivedMessage() {
 		byte[] data = Decode.getRxMessageData(super.rxData);
@@ -91,8 +106,9 @@ class RXD_EPC_TID_UserData_6C_2 extends BaseMessageNotification {
 
 		private int temperatureLen = -1;
 		private byte[] temperatureData = null;
+		//需要更新计算公式
 		public double getTemperature(){
-			double temperature = 0;
+			double temperature = -100;
 
 			if(buff != null && buff.length >= 6){
 				if(epcLen == -1){
@@ -104,7 +120,7 @@ class RXD_EPC_TID_UserData_6C_2 extends BaseMessageNotification {
 				if(udLen == -1){
 					udLen = buff[3 + this.epcLen + this.tidLen] & 0xFF;
 				}
-				if(this.epcLen + this.tidLen + this.udLen + 4 >= buff.length){
+				if((this.epcLen + this.tidLen + this.udLen + 4) >= buff.length){
 					return temperature;
 				}
 				if(temperatureLen == -1){
@@ -113,28 +129,57 @@ class RXD_EPC_TID_UserData_6C_2 extends BaseMessageNotification {
 				if((this.epcLen + this.tidLen + this.udLen + this.temperatureLen + 5) > buff.length){
 					return temperature;
 				}
-				if(this.temperatureLen != 14){
+				if(this.temperatureLen != 10){
 					return temperature;
 				}
 				this.temperatureData = new byte[this.temperatureLen];
 				System.arraycopy(buff, 6 + this.epcLen + this.tidLen + this.udLen, this.temperatureData, 0, this.temperatureLen);
 
-				byte[] aByte = new byte[4];
-				System.arraycopy(temperatureData, 0, aByte, 0, 4);
-				byte[] bByte = new byte[4];
-				System.arraycopy(temperatureData, 4, bByte, 0, 4);
-				byte[] cByte = new byte[4];
-				System.arraycopy(temperatureData, 8, cByte, 0, 4);
-				byte[] Tcount = new byte[2];
-				System.arraycopy(temperatureData, 12, Tcount, 0, 2);
+				double C45 = temperatureData[0] << 8 | temperatureData[1] & 0xFF;
+				double C60 = temperatureData[2] << 8 | temperatureData[3] & 0xFF;
+				double C75 = temperatureData[4] << 8 | temperatureData[5] & 0xFF;
+				double C90 = temperatureData[6] << 8 | temperatureData[7] & 0xFF;
+				double cCurr = temperatureData[8] << 8 | temperatureData[9] & 0xFF;
 
-				double a = Util.convertByteToDouble(Util.convertByteArrayToHexString(aByte));
-				double b = Util.convertByteToDouble(Util.convertByteArrayToHexString(bByte));
-				double c = Util.convertByteToDouble(Util.convertByteArrayToHexString(cByte));
-				short tcount = Short.parseShort(Util.convertByteArrayToHexString(Tcount), 16);
+				double C_45 = 0;
+				double C_60 = 0;
+				double C_75 = 0;
+				int step = getStepValue();
+				int initValue = getInitValue();
 
-				double tidle = tcount / (30.595 + 0.0125);
-				temperature = (a * tidle * tidle + b * tidle + c);
+				if (cCurr <= C75) {
+					C_45 = C45;
+					C_60 = C60;
+					C_75 = C75;
+				} else {// cCurr > C75
+					C_45 = C60;
+					C_60 = C75;
+					C_75 = C90;
+					initValue += step;
+				}
+
+				double A = (step * (C_45 - 2 * C_60 + C_75))
+						/ ((C_75 * C_75 * C_45 - C_75 * C_75 * C_60 + C_45
+						* C_45 * C_60 - C_75 * C_45 * C_45 + C_75
+						* C_60 * C_60 - C_45 * C_60 * C_60));
+				double B = -((C_45 * C_45 + C_75 * C_75 - 2 * C_60 * C_60) * step)
+						/ ((C_75 * C_75 * C_45 - C_75 * C_75 * C_60 + C_45
+						* C_45 * C_60 - C_75 * C_45 * C_45 + C_75
+						* C_60 * C_60 - C_45 * C_60 * C_60));
+				double C = (initValue
+						* (C_75 * C_75 * C_45 - C_75 * C_75 * C_60 + C_45
+						* C_45 * C_60 - C_75 * C_45 * C_45 + C_75
+						* C_60 * C_60 - C_45 * C_60 * C_60) + step
+						* (2 * C_45 * C_45 * C_60 - C_45 * C_45 * C_75 + C_45
+						* C_75 * C_75 - 2 * C_45 * C_60 * C_60))
+						/ ((C_75 * C_75 * C_45 - C_75 * C_75 * C_60 + C_45
+						* C_45 * C_60 - C_75 * C_45 * C_45 + C_75
+						* C_60 * C_60 - C_45 * C_60 * C_60));
+
+				//				if(a == -1 || b == -1 || c == -1){
+				//					return temperature;
+				//				}
+				temperature = (A * cCurr * cCurr + B * cCurr + C);
 			}
 			return temperature;
 		}

@@ -22,7 +22,7 @@ public class RXD_TagData extends BaseMessageNotification {
 		try {
 			return new ReceivedInfo(null, reader, msg);
 		} catch (Exception e) {
-			return null;
+			return null;	// LZR_0.0.5
 		}
 	}
 
@@ -217,6 +217,8 @@ public class RXD_TagData extends BaseMessageNotification {
 				}
 			} else if (msgType.equals("RXD_EPC_TID_UserData_6C_2")) {
 				RXD_EPC_TID_UserData_6C_2 m = (RXD_EPC_TID_UserData_6C_2) msg;
+				m.setInitValue(reader.getInitValue());
+				m.setStepValue(reader.getStepValue());
 				this.tagType = "6C";
 				this.tid = m.getReceivedMessage().getTID();
 				this.userdata = m.getReceivedMessage().getUserData();
