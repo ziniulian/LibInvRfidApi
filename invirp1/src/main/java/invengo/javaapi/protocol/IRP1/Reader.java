@@ -254,11 +254,14 @@ public class Reader extends BaseReader implements
 	private BluetoothLEBroadcastReceiver mBluetoothChangeReceiver = null;
 	private IntentFilter mAclConnectFilter = null;
 	private IntentFilter mAclDisconnectFilter = null;
+	private IntentFilter mAclDevPowFilter = null;
 	private void registerBluetoothBroadcastReceiver() {
 		InvengoLog.i(TAG, "INFO.Register broadcast.");
 		mAclConnectFilter = new IntentFilter(BluetoothLE.ACTION_GATT_CONNECTED);
 		mAclDisconnectFilter = new IntentFilter(BluetoothLE.ACTION_GATT_DISCONNECTED);
+		mAclDevPowFilter = new IntentFilter(BluetoothLE.ACTION_GATT_DEVPOW);
 		mBluetoothChangeReceiver = new BluetoothLEBroadcastReceiver();
+		super.context.registerReceiver(mBluetoothChangeReceiver, mAclDevPowFilter);
 		super.context.registerReceiver(mBluetoothChangeReceiver, mAclConnectFilter);
 		super.context.registerReceiver(mBluetoothChangeReceiver, mAclDisconnectFilter);
 	}
@@ -268,7 +271,9 @@ public class Reader extends BaseReader implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-			if(action.equals(BluetoothLE.ACTION_GATT_CONNECTED)){
+			if(action.equals(BluetoothLE.ACTION_GATT_DEVPOW)) {
+				sendPowBroadcast (intent);
+			} else if(action.equals(BluetoothLE.ACTION_GATT_CONNECTED)){
 				try {
 					Thread.sleep(1 * 100);
 				} catch (InterruptedException e) {
@@ -292,6 +297,11 @@ public class Reader extends BaseReader implements
 	private void sendBroadcast(String action) {
 		Intent broadcastIntent = new Intent(action);
 		super.context.sendBroadcast(broadcastIntent);
+	}
+
+	private void sendPowBroadcast(Intent t) {
+		t.setAction(ACTION_READER_DEVPOW);
+		super.context.sendBroadcast(t);
 	}
 
 	/*

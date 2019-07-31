@@ -8,6 +8,7 @@ import invengo.javaapi.protocol.IRP1.Reader;
 import tk.ziniulian.util.communication.Blutos.BlutosDev;
 import tk.ziniulian.util.communication.Blutos.BlutosLE;
 import tk.ziniulian.util.communication.Blutos.EmBlutos;
+import tk.ziniulian.util.communication.Blutos.EmNtfTyp;
 import tk.ziniulian.util.communication.Blutos.InfBlutosEvt;
 
 /**
@@ -22,6 +23,7 @@ public class Ble extends ICommunication {
 	private OnBleCheckEvt cEvt;
 	private OnBleOpenEvt oEvt;
 	private OnBleScanDevEvt sEvt;
+	private OnDevPowEvt pEvt;
 
 	public Ble (Activity a) {
 		this.ac = a;
@@ -45,6 +47,8 @@ public class Ble extends ICommunication {
 					case COT_ERR:
 					case COT_ERRNTF:
 						if (oEvt != null) {
+//							rd.disConnect();
+							setConnected(false);
 							oEvt.onOpen(false);
 						}
 						break;
@@ -89,6 +93,13 @@ public class Ble extends ICommunication {
 			public void onReceive(BlutosLE self, byte[] dat) {
 //Log.i("-- 接收的信息 ： --", Bytes2Hexstr(dat));
 				setBufferQueue(dat);
+			}
+
+			@Override
+			public void onPower(BlutosLE self, int p) {
+				if (pEvt != null) {
+					pEvt.onPow(p);
+				}
 			}
 		});
 	}
@@ -172,6 +183,12 @@ public class Ble extends ICommunication {
 		return this;
 	}
 
+	public Ble setDevPowEvt(OnDevPowEvt pEvt) {
+		ble.setTyp(EmNtfTyp.ALL);
+		this.pEvt = pEvt;
+		return this;
+	}
+
 	// 开启蓝牙监听接口
 	public interface OnBleCheckEvt {
 		public void onCheck(boolean ok);
@@ -186,5 +203,10 @@ public class Ble extends ICommunication {
 	public interface OnBleScanDevEvt {
 		public void onScanDev(BlutosDev dev);
 		public void onScanEnd();
+	}
+
+	// 电量监听接口
+	public interface OnDevPowEvt {
+		public void onPow(int pow);
 	}
 }

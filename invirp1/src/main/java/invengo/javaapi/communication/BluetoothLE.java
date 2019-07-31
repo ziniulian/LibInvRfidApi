@@ -5,8 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +12,7 @@ import android.content.Intent;
 import java.util.UUID;
 
 import invengo.javaapi.core.ICommunication;
+import tk.ziniulian.util.communication.Blutos.BlutosNtfs;
 
 /**
  * BLE
@@ -26,13 +25,21 @@ public class BluetoothLE extends ICommunication {
 	private BluetoothGatt mBluetoothGatt = null;
 	private Object lockObj = new Object();
 	//	private EncodeUtil encryptUtil = new EncodeUtil();
-	private static final String BLE_SERVICE_UUID = "0000fff0-0000-1000-8000-00805f9b34fb";
-	private static final String BLE_WRITE_CHARACTERISTIC_UUID = "0000fff2-0000-1000-8000-00805f9b34fb";
-	private static final String BLE_NOTIFY_CHARACTERISTIC_UUID = "0000fff1-0000-1000-8000-00805f9b34fb";
-	private static final String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb";
+
+	// 电量UUID
+	private BlutosNtfs powntf = new BlutosNtfs(
+		"0000180f-0000-1000-8000-00805f9b34fb",
+		"00002a19-0000-1000-8000-00805f9b34fb"
+	);
+	// 读写UUID
+	private BlutosNtfs wrntf = new BlutosNtfs(
+		"0000fff0-0000-1000-8000-00805f9b34fb",
+		"0000fff1-0000-1000-8000-00805f9b34fb"
+	).addId("wrt", "0000fff2-0000-1000-8000-00805f9b34fb");
 
 	public static final String ACTION_GATT_CONNECTED = "invengo.javaapi.communication.BluetoothLE.ACTION_GATT_CONNECTED";
-	public static final String ACTION_GATT_DISCONNECTED = "invengo.javaapi.communication.BluetoothLE.ACTION_GATT_DISCONNECTED";
+	public static final String ACTION_GATT_DISCONNECTED = "invengo.javaapi.oocommunication.BluetthLE.ACTION_GATT_DISCONNECTED";
+	public static final String ACTION_GATT_DEVPOW = "invengo.javaapi.oocommunication.BluetthLE.ACTION_GATT_DevicePower";
 
 	@Override
 	public boolean open(String connString) throws Exception {
@@ -82,16 +89,8 @@ public class BluetoothLE extends ICommunication {
 	 */
 	private boolean bluetoothLESend(byte[] data) {
 		synchronized (lockObj) {
-			BluetoothGattService writeGattService = mBluetoothGatt.getService(UUID.fromString(BLE_SERVICE_UUID));
-			if(null != writeGattService){
-				//				BluetoothGattCharacteristic writeGattCharacteristic = writeGattService.getCharacteristic(UUID.fromString(BLE_WRITE_CHARACTERISTIC_UUID));
 				BluetoothGattCharacteristic writeGattCharacteristic = null;
-				for(BluetoothGattCharacteristic characteristic : writeGattService.getCharacteristics()){
-					if(characteristic.getUuid().toString().equals(BLE_WRITE_CHARACTERISTIC_UUID)){
-						writeGattCharacteristic = characteristic;
-						break;
-					}
-				}
+				writeGattCharacteristic = wrntf.getChr("wrt");
 				if(null != writeGattCharacteristic){
 					//					mBluetoothGatt.setCharacteristicNotification(writeGattCharacteristic, true);
 					int property = 0;
@@ -109,11 +108,6 @@ public class BluetoothLE extends ICommunication {
 //					InvengoLog.i(TAG, "INFO. Actually send {%s}", Util.convertByteArrayToHexString(data));
 					mBluetoothGatt.writeCharacteristic(writeGattCharacteristic);
 					return true;
-				}else {
-//					InvengoLog.w(TAG, "WARN. bluetoothLESend().BluetoothGattCharacteristic is null.");
-				}
-			}else {
-//				InvengoLog.w(TAG, "WARN. bluetoothLESend().BluetoothGattService is null.");
 			}
 			return false;
 		}
@@ -137,7 +131,8 @@ public class BluetoothLE extends ICommunication {
 				gatt.discoverServices();
 			}else if(newState == BluetoothGatt.STATE_DISCONNECTED){
 //				InvengoLog.i(TAG, "INFO. BluetoothLE Device Disconnected.");
-				openNotifyChannel(false);
+				wrntf.close();
+				powntf.close();
 				BluetoothLE.this.setConnected(false);
 				if(null != mBluetoothGatt){
 					mBluetoothGatt.close();
@@ -151,87 +146,47 @@ public class BluetoothLE extends ICommunication {
 		@Override
 		public void onServicesDiscovered(BluetoothGatt gatt, int status) {
 			if(status == BluetoothGatt.GATT_SUCCESS){
-
 				mBluetoothGatt = gatt;
 				BluetoothLE.this.setConnected(true);
 
-				openNotifyChannel(true);
-				sendBroadcast(ACTION_GATT_CONNECTED);
+				if (wrntf.init(gatt) && powntf.init(gatt)) {
+					wrntf.open();
+					sendBroadcast(ACTION_GATT_CONNECTED);
+					powntf.openT(250, 2);
+				}
 			}
 		};
 
 		@Override
-		public void onCharacteristicChanged(BluetoothGatt gatt,
-											BluetoothGattCharacteristic characteristic) {
-			String uuid = characteristic.getUuid().toString();
-			if(BLE_NOTIFY_CHARACTERISTIC_UUID.equals(uuid)){//Notify Characteristic uuid
-				//				byte[] response = encryptUtil.decodeMessage(characteristic.getValue());
+		public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+			UUID uuid = characteristic.getUuid();
+			if(wrntf.getNtfId().equals(uuid)){
+//				byte[] response = encryptUtil.decodeMessage(characteristic.getValue());
 				byte[] response = characteristic.getValue();
 //				InvengoLog.i(TAG, "INFO. Receiving Read Data {%s}.", Util.convertByteArrayToHexString(response));
 				BluetoothLE.this.setBufferQueue(response);
+			} else if (powntf.getNtfId().equals(uuid)) {
+				sendPowBroadcast(characteristic.getValue()[0] + "");
 			}
 		};
 
 		@Override
-		public void onCharacteristicRead(BluetoothGatt gatt,
-										 BluetoothGattCharacteristic characteristic, int status) {
-			if(status == BluetoothGatt.GATT_SUCCESS){
-//				InvengoLog.i(TAG, "INFO. Receiving BluetoothLE Read Data.");
-				//				byte[] response = encryptUtil.decodeMessage(characteristic.getValue());
-				byte[] response = characteristic.getValue();
-//				InvengoLog.i(TAG, "INFO. Receiving Read Data {%s}.", Util.convertByteArrayToHexString(response));
-				//				BluetoothLE.this.setBufferQueue(response);
+		public void onCharacteristicRead (BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+			if(status == BluetoothGatt.GATT_SUCCESS && characteristic.getUuid().equals(powntf.getNtfId())){
+				sendPowBroadcast(characteristic.getValue()[0] + "");
 			}
 		}
-
-		@Override
-		public void onCharacteristicWrite(BluetoothGatt gatt,
-										  BluetoothGattCharacteristic characteristic, int status) {
-			if(status == BluetoothGatt.GATT_SUCCESS){
-//				InvengoLog.i(TAG, "INFO.Receiving BluetoothLE Write Data.");
-				//				byte[] response = encryptUtil.decodeMessage(characteristic.getValue());
-				byte[] response = characteristic.getValue();
-//				InvengoLog.i(TAG, "INFO. Receiving Write Data {%s}.", Util.convertByteArrayToHexString(response));
-				//				BluetoothLE.this.setBufferQueue(response);
-			}
-		};
 
 	};
-
-	/**
-	 * BLE notify数据开关
-	 */
-	protected boolean openNotifyChannel(boolean enable) {
-		boolean success = false;
-		if(null != mBluetoothGatt){
-//			InvengoLog.i(TAG, "INFO.BluetoothLE Notify Channel Status {%s} will set.", enable ? "OPEN" : "CLOSE");
-			BluetoothGattService gattService = mBluetoothGatt.getService(UUID.fromString(BLE_SERVICE_UUID));
-			if(null != gattService){
-				BluetoothGattCharacteristic gattCharacteristic = gattService.getCharacteristic(UUID.fromString(BLE_NOTIFY_CHARACTERISTIC_UUID));
-				success = mBluetoothGatt.setCharacteristicNotification(gattCharacteristic, enable);
-				if(success){
-					BluetoothGattDescriptor gattDescriptor = gattCharacteristic.getDescriptor(UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
-					if(null != gattDescriptor){
-						byte[] value = enable ? BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE : BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE;
-						gattDescriptor.setValue(value);
-						mBluetoothGatt.writeDescriptor(gattDescriptor);
-//						InvengoLog.i(TAG, "INFO.BluetoothLE Notify Channel Status is setting.");
-					}else {
-//						InvengoLog.w(TAG, "INFO.openNotifyChannel().BluetoothGattDescriptor is null.");
-					}
-				}else {
-//					InvengoLog.w(TAG, "INFO.openNotifyChannel().BluetoothGattCharacteristic is null.");
-				}
-			}else {
-//				InvengoLog.w(TAG, "INFO.openNotifyChannel().BluetoothGattService is null.");
-			}
-		}
-		return success;
-	}
 
 	protected void sendBroadcast(String action) {
 		Intent broadcastIntent = new Intent(action);
 		super.context.sendBroadcast(broadcastIntent);
 	}
 
+	private void sendPowBroadcast(String p) {
+		Intent broadcastIntent = new Intent(ACTION_GATT_DEVPOW);
+		broadcastIntent.putExtra("pow", p);
+		super.context.sendBroadcast(broadcastIntent);
+	}
 }

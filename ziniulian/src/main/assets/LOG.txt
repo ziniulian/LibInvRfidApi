@@ -1,5 +1,12 @@
 ﻿子牛连 Java通用工具
 
+V0.0.7 ：
+完成日期 ： 2019-7-31 17:00
+完成人 ： 李泽荣
+	1. BlutosNtfs : 新增蓝牙 notify 开关类
+	2. BlutosLE : 改用 BlutosNtfs 管理UUID
+	2. BlutosLE : 加入 bg 的同步锁
+
 V0.0.4 ：
 完成日期 ： 2019-7-17 17:00
 完成人 ： 李泽荣

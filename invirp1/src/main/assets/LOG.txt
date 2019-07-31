@@ -1,5 +1,13 @@
 ﻿Invengo Android版RFID类库
 
+V0.0.7 ：
+完成日期 ： 2019-7-31 17:00
+完成人：李泽荣
+	1. BluetoothLE : 添加蓝牙获取设备电量功能
+	2. BluetoothLE 、 Reader 、 BaseReader : 电量变动信息按赖学良的框架，使用广播传输
+	3. Ble : 解决处理蓝牙异常断开时，没有关闭读写器连接的问题。
+	4. Ble.OnDevPowEvt : 新增电量监听接口
+
 V0.0.6 ：
 完成日期 ： 2019-7-24 17:00
 完成人：李泽荣

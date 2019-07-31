@@ -18,4 +18,5 @@ public interface InfBlutosEvt {
 	public void onDisConnected (BlutosLE self);	// 断开连接
 
 	public void onReceive (BlutosLE self, byte[] dat);	// 接收消息
+	public void onPower (BlutosLE self, int p);	// 电量信息
 }

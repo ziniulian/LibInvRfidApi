@@ -1,14 +1,15 @@
 package invengo.javaapi.core;
 
+import android.app.Activity;
+
+import com.invengo.lib.diagnostics.InvengoLog;
+
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.invengo.lib.diagnostics.InvengoLog;
-
-import android.app.Activity;
 import invengo.javaapi.communication.Bluetooth;
 import invengo.javaapi.core.Util.LogType;
 import invengo.javaapi.handle.IApiExceptionHandle;
@@ -36,10 +37,11 @@ public abstract class BaseReader implements IMsgReceivedHandle, IApiExceptionHan
 	
 	public static final String ACTION_READER_CONNECTED = "invengo.javaapi.core.BaseReader.ACTION_READER_CONNECTED";
 	public static final String ACTION_READER_DISCONNECTED = "invengo.javaapi.core.BaseReader.ACTION_READER_DISCONNECTED";
+	public static final String ACTION_READER_DEVPOW = "invengo.javaapi.core.BaseReader.ACTION_READER_DevicePower";
 	private boolean isExistReaderConfig = true;
 
 	private Socket server;
-	
+
 	private static final byte PARAMETER_RFID_1D2D = (byte) 0x84;
 	private static final byte[] RFID_DATA = new byte[]{0x01, 0x00};
 	private static final byte[] BARCODE_DATA = new byte[]{0x01, 0x01};
